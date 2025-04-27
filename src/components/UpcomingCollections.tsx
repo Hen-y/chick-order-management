@@ -1,49 +1,96 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 const UpcomingCollections = () => {
-  const [collections, setCollections] = useState([
-    {
-      id: 1,
-      customerName: "Jane Smith",
-      quantity: 25,
-      type: "Village",
-      dueDate: "29 Apr 2025",
-      daysLeft: 2,
-    },
-    {
-      id: 2,
-      customerName: "James Wilson",
-      quantity: 75,
-      type: "Village",
-      dueDate: "29 Apr 2025",
-      daysLeft: 2,
-    },
-  ]);
+  const [collections, setCollections] = useState<any[]>([]);
+
+  // Load collections from localStorage on mount and when updated
+  useEffect(() => {
+    const loadCollections = () => {
+      const savedCollections = localStorage.getItem("upcomingCollections");
+      if (savedCollections) {
+        setCollections(JSON.parse(savedCollections));
+      }
+    };
+    
+    loadCollections();
+    
+    // Listen for changes from other components
+    window.addEventListener('collectionsUpdated', loadCollections);
+    
+    return () => {
+      window.removeEventListener('collectionsUpdated', loadCollections);
+    };
+  }, []);
 
   const handleMarkAsCollected = (id: number) => {
-    // Remove the collection from the list
-    const updatedCollections = collections.filter(
-      collection => collection.id !== id
-    );
-    
     // Find the collection that was marked as collected
     const markedCollection = collections.find(
       collection => collection.id === id
     );
     
-    // Update the collections list
+    // Remove the collection from the list
+    const updatedCollections = collections.filter(
+      collection => collection.id !== id
+    );
+    
+    // Update localStorage
+    localStorage.setItem("upcomingCollections", JSON.stringify(updatedCollections));
+    
+    // Update state
     setCollections(updatedCollections);
     
-    // Show success toast
+    // Add to reminders after 2 months
     if (markedCollection) {
+      const reminderDate = new Date();
+      reminderDate.setMonth(reminderDate.getMonth() + 2); // 2 months in the future
+      
+      const newReminder = {
+        id: Date.now(),
+        customerName: markedCollection.customerName,
+        quantity: markedCollection.quantity,
+        type: markedCollection.type,
+        dueDate: reminderDate.toLocaleDateString('en-US', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }),
+        daysLeft: 59, // Approximately 2 months
+      };
+      
+      // Get existing reminders or initialize empty array
+      const existingReminders = JSON.parse(localStorage.getItem("upcomingReminders") || "[]");
+      
+      // Add to reminders and update localStorage
+      existingReminders.push(newReminder);
+      localStorage.setItem("upcomingReminders", JSON.stringify(existingReminders));
+      
+      // Update customer record
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+      const updatedCustomers = customers.map((customer: any) => {
+        if (customer.name === markedCollection.customerName) {
+          return {
+            ...customer,
+            nextCollection: null,
+            reminderDate: newReminder.dueDate
+          };
+        }
+        return customer;
+      });
+      
+      localStorage.setItem("customers", JSON.stringify(updatedCustomers));
+      
+      // Notify that reminders have been updated
+      window.dispatchEvent(new CustomEvent('remindersUpdated'));
+      window.dispatchEvent(new CustomEvent('customersUpdated'));
+      
+      // Show success toast
       toast.success(`Marked as collected`, {
         description: `${markedCollection.quantity} ${markedCollection.type} chicks for ${markedCollection.customerName}`
       });
       
-      // In a real app, would set a reminder for 2 months later
-      // For now, let's just mention it in the toast
+      // Show info toast about reminder
       toast.info(`Reminder set for 2 months from now`, {
         description: `Follow up with ${markedCollection.customerName} about reordering`
       });

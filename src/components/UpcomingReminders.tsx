@@ -1,31 +1,61 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 const UpcomingReminders = () => {
-  const [reminders, setReminders] = useState([
-    {
-      id: 1,
-      customerName: "John Doe",
-      quantity: 50,
-      type: "Broiler",
-      dueDate: "25 Jun 2025",
-      daysLeft: 59,
-    },
-  ]);
+  const [reminders, setReminders] = useState<any[]>([]);
+
+  // Load reminders from localStorage on mount and when updated
+  useEffect(() => {
+    const loadReminders = () => {
+      const savedReminders = localStorage.getItem("upcomingReminders");
+      if (savedReminders) {
+        setReminders(JSON.parse(savedReminders));
+      }
+    };
+    
+    loadReminders();
+    
+    // Listen for changes from other components
+    window.addEventListener('remindersUpdated', loadReminders);
+    
+    return () => {
+      window.removeEventListener('remindersUpdated', loadReminders);
+    };
+  }, []);
 
   const handleMarkAsReminded = (id: number) => {
-    // Remove the reminder from the list
-    const updatedReminders = reminders.filter(reminder => reminder.id !== id);
-    
     // Find the reminder that was marked
     const markedReminder = reminders.find(reminder => reminder.id === id);
     
-    // Update the reminders list
+    // Remove the reminder from the list
+    const updatedReminders = reminders.filter(reminder => reminder.id !== id);
+    
+    // Update localStorage
+    localStorage.setItem("upcomingReminders", JSON.stringify(updatedReminders));
+    
+    // Update state
     setReminders(updatedReminders);
     
-    // Show success toast
+    // Update customer record
     if (markedReminder) {
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+      const updatedCustomers = customers.map((customer: any) => {
+        if (customer.name === markedReminder.customerName) {
+          return {
+            ...customer,
+            reminderDate: null
+          };
+        }
+        return customer;
+      });
+      
+      localStorage.setItem("customers", JSON.stringify(updatedCustomers));
+      
+      // Notify that customers have been updated
+      window.dispatchEvent(new CustomEvent('customersUpdated'));
+      
+      // Show success toast
       toast.success(`Customer has been reminded`, {
         description: `${markedReminder.customerName} for ${markedReminder.quantity} ${markedReminder.type} chicks`
       });

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +7,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
-  const [broilerPrice, setBroilerPrice] = useState<number>(16);
-  const [villagePrice, setVillagePrice] = useState<number>(15);
+  // Initialize with values from localStorage or defaults
+  const [broilerPrice, setBroilerPrice] = useState<number>(
+    Number(localStorage.getItem("broilerPrice")) || 16
+  );
+  const [villagePrice, setVillagePrice] = useState<number>(
+    Number(localStorage.getItem("villagePrice")) || 15
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
@@ -24,9 +29,13 @@ const SettingsPage = () => {
     
     // Simulate API call
     setTimeout(() => {
-      // In a real app, this would save to backend/local storage
+      // Save to localStorage
       localStorage.setItem("broilerPrice", broilerPrice.toString());
       localStorage.setItem("villagePrice", villagePrice.toString());
+      
+      // Dispatch custom event to notify components about price changes
+      // This is needed for components in the same browser tab
+      window.dispatchEvent(new CustomEvent('priceUpdated'));
       
       toast.success("Prices updated successfully", {
         description: `Broiler: ${broilerPrice} Kwacha, Village: ${villagePrice} Kwacha`

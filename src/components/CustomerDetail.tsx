@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -10,7 +10,6 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { X, Plus, Trash } from "lucide-react";
-import { mockCustomers } from "../data/mockData";
 import { toast } from "sonner";
 import { 
   AlertDialog,
@@ -29,17 +28,55 @@ interface CustomerDetailProps {
 }
 
 const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
-  // In a real app, this would fetch customer data
-  const customer = mockCustomers.find(c => c.id === customerId);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [customer, setCustomer] = useState<any>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
+  // Load customer from localStorage
+  useEffect(() => {
+    const loadCustomer = () => {
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+      const foundCustomer = customers.find((c: any) => c.id === customerId);
+      setCustomer(foundCustomer);
+    };
+    
+    loadCustomer();
+    
+    // Listen for customer updates
+    window.addEventListener('customersUpdated', loadCustomer);
+    
+    return () => {
+      window.removeEventListener('customersUpdated', loadCustomer);
+    };
+  }, [customerId]);
+
   if (!customer) {
-    return <div>Customer not found</div>;
+    return <div>Loading customer details...</div>;
   }
 
   const handleDelete = () => {
-    // In a real app, this would delete the customer
+    // Get all customers
+    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+    
+    // Filter out the deleted customer
+    const updatedCustomers = customers.filter((c: any) => c.id !== customerId);
+    
+    // Save back to localStorage
+    localStorage.setItem("customers", JSON.stringify(updatedCustomers));
+    
+    // Also remove any collections or reminders for this customer
+    const collections = JSON.parse(localStorage.getItem("upcomingCollections") || "[]");
+    const updatedCollections = collections.filter((c: any) => c.customerName !== customer.name);
+    localStorage.setItem("upcomingCollections", JSON.stringify(updatedCollections));
+    
+    const reminders = JSON.parse(localStorage.getItem("upcomingReminders") || "[]");
+    const updatedReminders = reminders.filter((r: any) => r.customerName !== customer.name);
+    localStorage.setItem("upcomingReminders", JSON.stringify(updatedReminders));
+    
+    // Notify of updates
+    window.dispatchEvent(new CustomEvent('collectionsUpdated'));
+    window.dispatchEvent(new CustomEvent('remindersUpdated'));
+    window.dispatchEvent(new CustomEvent('customersUpdated'));
+    
     toast.success("Customer deleted successfully");
     onClose();
   };
@@ -87,14 +124,22 @@ const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customer.orders.map((order, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{order.type}</TableCell>
-                    <TableCell>{order.quantity}</TableCell>
-                    <TableCell>{order.total} Kwacha</TableCell>
+                {customer.orders && customer.orders.length > 0 ? (
+                  customer.orders.map((order: any, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{order.type}</TableCell>
+                      <TableCell>{order.quantity}</TableCell>
+                      <TableCell>{order.total} Kwacha</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                      No order history
+                    </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
@@ -109,23 +154,14 @@ const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
             New Order
           </Button>
           
-          {!showConfirmDelete ? (
-            <Button 
-              variant="outline" 
-              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-              onClick={() => setShowDeleteAlert(true)}
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          ) : (
-            <Button 
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              Confirm Delete
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            onClick={() => setShowDeleteAlert(true)}
+          >
+            <Trash className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
         </div>
       </div>
 

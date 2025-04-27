@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -7,6 +7,12 @@ import { useNavigate } from "react-router-dom";
 
 const NewOrderForm = () => {
   const navigate = useNavigate();
+  // Get prices from localStorage or use defaults
+  const [prices, setPrices] = useState({
+    broiler: Number(localStorage.getItem("broilerPrice")) || 16,
+    village: Number(localStorage.getItem("villagePrice")) || 15
+  });
+  
   const [formData, setFormData] = useState({
     customerName: "",
     phoneNumber: "",
@@ -14,8 +20,28 @@ const NewOrderForm = () => {
     chickType: "broiler"
   });
 
+  // Listen for price changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setPrices({
+        broiler: Number(localStorage.getItem("broilerPrice")) || 16,
+        village: Number(localStorage.getItem("villagePrice")) || 15
+      });
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-tab updates
+    window.addEventListener('priceUpdated', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('priceUpdated', handleStorageChange);
+    };
+  }, []);
+
   const calculateTotal = () => {
-    const price = formData.chickType === "broiler" ? 16 : 15;
+    const price = formData.chickType === "broiler" ? prices.broiler : prices.village;
     return formData.quantity * price;
   };
 
@@ -67,8 +93,45 @@ const NewOrderForm = () => {
       year: 'numeric'
     });
     
-    // In a real app, this would save to backend/database
-    // For now, we'll just show a success message and clear the form
+    // Create new collection item
+    const newCollection = {
+      id: Date.now(),
+      customerName: formData.customerName,
+      quantity: formData.quantity,
+      type: formData.chickType === "broiler" ? "Broiler" : "Village",
+      dueDate: formattedDate,
+      daysLeft: Math.ceil((collectionDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    };
+    
+    // Get existing collections or initialize empty array
+    const existingCollections = JSON.parse(localStorage.getItem("upcomingCollections") || "[]");
+    
+    // Add new collection and save back to localStorage
+    existingCollections.push(newCollection);
+    localStorage.setItem("upcomingCollections", JSON.stringify(existingCollections));
+    
+    // Also add to customers if it's a new customer
+    const existingCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
+    const customerExists = existingCustomers.some((c: any) => 
+      c.name.toLowerCase() === formData.customerName.toLowerCase() && 
+      c.phone === formData.phoneNumber
+    );
+    
+    if (!customerExists) {
+      const newCustomer = {
+        id: `cust-${Date.now()}`,
+        name: formData.customerName,
+        phone: formData.phoneNumber,
+        nextCollection: formattedDate,
+        reminderDate: null,
+        orders: []
+      };
+      
+      existingCustomers.push(newCustomer);
+      localStorage.setItem("customers", JSON.stringify(existingCustomers));
+    }
+    
+    // Success message
     toast.success(`Order created successfully!`, {
       description: `${formData.quantity} ${formData.chickType} chicks for ${formData.customerName}. Collection date: ${formattedDate}`
     });
@@ -80,6 +143,10 @@ const NewOrderForm = () => {
       quantity: 0,
       chickType: "broiler"
     });
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('collectionsUpdated'));
+    window.dispatchEvent(new CustomEvent('customersUpdated'));
     
     // Optionally navigate to customers page
     setTimeout(() => {
@@ -138,8 +205,8 @@ const NewOrderForm = () => {
             value={formData.chickType}
             onChange={(e) => setFormData({ ...formData, chickType: e.target.value })}
           >
-            <option value="broiler">Broiler (16 Kwacha)</option>
-            <option value="village">Village (15 Kwacha)</option>
+            <option value="broiler">Broiler ({prices.broiler} Kwacha)</option>
+            <option value="village">Village ({prices.village} Kwacha)</option>
           </select>
         </div>
       </div>

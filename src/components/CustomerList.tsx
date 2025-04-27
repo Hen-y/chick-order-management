@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Table, 
   TableBody, 
@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
@@ -36,7 +37,33 @@ const CustomerList = ({ onSelectCustomer, selectedCustomerId }: CustomerListProp
     phone: "",
   });
   
-  const filteredCustomers = mockCustomers.filter(customer => 
+  // State to store customers from localStorage or fall back to mockCustomers
+  const [customers, setCustomers] = useState<any[]>([]);
+  
+  // Load customers from localStorage on mount and when updated
+  useEffect(() => {
+    const loadCustomers = () => {
+      const savedCustomers = localStorage.getItem("customers");
+      if (savedCustomers) {
+        setCustomers(JSON.parse(savedCustomers));
+      } else {
+        // If no customers in localStorage yet, use mockCustomers and save them
+        setCustomers(mockCustomers);
+        localStorage.setItem("customers", JSON.stringify(mockCustomers));
+      }
+    };
+    
+    loadCustomers();
+    
+    // Listen for changes from other components
+    window.addEventListener('customersUpdated', loadCustomers);
+    
+    return () => {
+      window.removeEventListener('customersUpdated', loadCustomers);
+    };
+  }, []);
+  
+  const filteredCustomers = customers.filter(customer => 
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone.includes(searchTerm)
   );
@@ -53,7 +80,23 @@ const CustomerList = ({ onSelectCustomer, selectedCustomerId }: CustomerListProp
       return;
     }
     
-    // In a real app, this would add the customer to the database
+    // Create new customer
+    const newCustomerData = {
+      id: `cust-${Date.now()}`,
+      name: newCustomer.name,
+      phone: newCustomer.phone,
+      nextCollection: null,
+      reminderDate: null,
+      orders: []
+    };
+    
+    // Add to customers list
+    const updatedCustomers = [...customers, newCustomerData];
+    
+    // Update state and localStorage
+    setCustomers(updatedCustomers);
+    localStorage.setItem("customers", JSON.stringify(updatedCustomers));
+    
     toast.success("Customer added successfully");
     
     // Close dialog and reset form
@@ -62,6 +105,9 @@ const CustomerList = ({ onSelectCustomer, selectedCustomerId }: CustomerListProp
       name: "",
       phone: "",
     });
+    
+    // Notify that customers have been updated
+    window.dispatchEvent(new CustomEvent('customersUpdated'));
   };
 
   return (
@@ -143,6 +189,9 @@ const CustomerList = ({ onSelectCustomer, selectedCustomerId }: CustomerListProp
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Customer</DialogTitle>
+            <DialogDescription>
+              Add a new customer to your database.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
