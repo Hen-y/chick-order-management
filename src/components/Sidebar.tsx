@@ -1,6 +1,5 @@
 
-import { Link } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard as Dashboard,
   Users, 
@@ -9,6 +8,7 @@ import {
   Settings,
   LogOut
 } from "lucide-react";
+import { toast } from "sonner";
 
 const navItems = [
   { name: "Dashboard", icon: Dashboard, path: "/" },
@@ -24,6 +24,14 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isOpen }: SidebarProps) => {
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
+
   return (
     <div className={`bg-[#1A1F2C] text-white w-64 min-h-screen flex flex-col ${isOpen ? '' : 'hidden'}`}>
       <div className="p-4 border-b border-gray-700">
@@ -47,7 +55,10 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       </nav>
 
       <div className="p-4 border-t border-gray-700">
-        <button className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white w-full">
+        <button 
+          className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white w-full hover:bg-red-700 rounded-lg transition-colors"
+          onClick={handleLogout}
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </button>

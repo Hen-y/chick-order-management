@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const NewOrderForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     customerName: "",
     phoneNumber: "",
@@ -19,8 +21,70 @@ const NewOrderForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Order submitted:", formData);
+    
+    // Validate form
+    if (formData.customerName.trim() === "") {
+      toast.error("Customer name is required");
+      return;
+    }
+    
+    if (formData.phoneNumber.trim() === "") {
+      toast.error("Phone number is required");
+      return;
+    }
+    
+    if (formData.quantity <= 0) {
+      toast.error("Quantity must be greater than zero");
+      return;
+    }
+    
+    // Calculate collection date
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    let collectionDate = new Date(today);
+    
+    // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    if (dayOfWeek === 2) {
+      // If Tuesday, next collection is Friday (+3 days)
+      collectionDate.setDate(today.getDate() + 3);
+    } else if (dayOfWeek === 5) {
+      // If Friday, next collection is Tuesday (+4 days)
+      collectionDate.setDate(today.getDate() + 4);
+    } else if (dayOfWeek < 2) {
+      // If Sunday or Monday, next collection is Tuesday
+      collectionDate.setDate(today.getDate() + (2 - dayOfWeek));
+    } else if (dayOfWeek > 2 && dayOfWeek < 5) {
+      // If Wednesday or Thursday, next collection is Friday
+      collectionDate.setDate(today.getDate() + (5 - dayOfWeek));
+    } else {
+      // If Saturday, next collection is Tuesday (3 days)
+      collectionDate.setDate(today.getDate() + 3);
+    }
+    
+    const formattedDate = collectionDate.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+    
+    // In a real app, this would save to backend/database
+    // For now, we'll just show a success message and clear the form
+    toast.success(`Order created successfully!`, {
+      description: `${formData.quantity} ${formData.chickType} chicks for ${formData.customerName}. Collection date: ${formattedDate}`
+    });
+    
+    // Reset form
+    setFormData({
+      customerName: "",
+      phoneNumber: "",
+      quantity: 0,
+      chickType: "broiler"
+    });
+    
+    // Optionally navigate to customers page
+    setTimeout(() => {
+      navigate("/customers");
+    }, 2000);
   };
 
   return (
@@ -58,9 +122,9 @@ const NewOrderForm = () => {
           </label>
           <Input
             type="number"
-            min="0"
-            value={formData.quantity}
-            onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+            min="1"
+            value={formData.quantity || ""}
+            onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
             required
           />
         </div>

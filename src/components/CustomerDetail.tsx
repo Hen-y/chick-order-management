@@ -12,6 +12,16 @@ import {
 import { X, Plus, Trash } from "lucide-react";
 import { mockCustomers } from "../data/mockData";
 import { toast } from "sonner";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CustomerDetailProps {
   customerId: string;
@@ -22,6 +32,7 @@ const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
   // In a real app, this would fetch customer data
   const customer = mockCustomers.find(c => c.id === customerId);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
   if (!customer) {
     return <div>Customer not found</div>;
@@ -35,7 +46,8 @@ const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
 
   const handleAddOrder = () => {
     // In a real app, this would open a form to add a new order
-    toast.info("Add order functionality would open here");
+    toast.success("Order added for " + customer.name);
+    onClose();
   };
 
   return (
@@ -101,7 +113,7 @@ const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
             <Button 
               variant="outline" 
               className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-              onClick={() => setShowConfirmDelete(true)}
+              onClick={() => setShowDeleteAlert(true)}
             >
               <Trash className="h-4 w-4 mr-2" />
               Delete
@@ -116,6 +128,25 @@ const CustomerDetail = ({ customerId, onClose }: CustomerDetailProps) => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the customer "{customer.name}" and all their order history.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

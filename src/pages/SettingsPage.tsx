@@ -9,13 +9,31 @@ import { toast } from "sonner";
 const SettingsPage = () => {
   const [broilerPrice, setBroilerPrice] = useState<number>(16);
   const [villagePrice, setVillagePrice] = useState<number>(15);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would save to backend/local storage
-    toast.success("Prices updated successfully", {
-      description: `Broiler: ${broilerPrice} Kwacha, Village: ${villagePrice} Kwacha`
-    });
+    setIsSaving(true);
+    
+    // Validate prices
+    if (broilerPrice <= 0 || villagePrice <= 0) {
+      toast.error("Prices must be greater than zero");
+      setIsSaving(false);
+      return;
+    }
+    
+    // Simulate API call
+    setTimeout(() => {
+      // In a real app, this would save to backend/local storage
+      localStorage.setItem("broilerPrice", broilerPrice.toString());
+      localStorage.setItem("villagePrice", villagePrice.toString());
+      
+      toast.success("Prices updated successfully", {
+        description: `Broiler: ${broilerPrice} Kwacha, Village: ${villagePrice} Kwacha`
+      });
+      
+      setIsSaving(false);
+    }, 800);
   };
 
   return (
@@ -53,8 +71,12 @@ const SettingsPage = () => {
               />
             </div>
             
-            <Button type="submit" className="bg-[#5B8C32] hover:bg-[#4A7129] w-full">
-              Save Changes
+            <Button 
+              type="submit" 
+              className="bg-[#5B8C32] hover:bg-[#4A7129] w-full"
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </form>
         </div>
