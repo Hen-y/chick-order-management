@@ -56,6 +56,14 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       </nav>
 
       <div className="p-4 flex flex-col items-center border-t border-gray-700">
+        <button 
+          className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white w-full hover:bg-red-700 rounded-lg transition-colors mb-4"
+          onClick={handleLogout}
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+        
         <img 
           src="/lovable-uploads/b0435e33-525c-4a83-9da6-fd5a9f6f8e53.png" 
           alt="Baobub Technologies" 
@@ -65,14 +73,6 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           <Copyright className="w-3 h-3 mr-1" />
           <span>2025 Baobub Technologies</span>
         </div>
-        
-        <button 
-          className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white w-full hover:bg-red-700 rounded-lg transition-colors"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-5 h-5" />
-          <span>Logout</span>
-        </button>
       </div>
     </div>
   );
