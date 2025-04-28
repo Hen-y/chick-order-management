@@ -34,10 +34,10 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   };
 
   return (
-    <div className={`bg-[#1A1F2C] text-white w-64 min-h-screen flex flex-col ${isOpen ? '' : 'hidden'}`}>
+    <div className={`bg-black text-white w-64 min-h-screen flex flex-col ${isOpen ? '' : 'hidden'}`}>
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center gap-3">
-          <img src="/lovable-uploads/bac695dc-9291-4d49-b359-e7c7cbbdb054.png" alt="Logo" className="w-10 h-10" />
+          <img src="/lovable-uploads/3e3bcc99-c365-4040-93a6-43fef524b461.png" alt="Logo" className="w-10 h-10" />
           <h1 className="text-xl font-bold">Hybrid Chicks</h1>
         </div>
       </div>

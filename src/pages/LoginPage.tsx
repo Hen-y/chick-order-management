@@ -43,49 +43,52 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-black text-white">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src="/lovable-uploads/89739bde-e578-4a3c-af95-89646c404e95.png" alt="Logo" className="w-16 h-16" />
+            <img src="/lovable-uploads/3e3bcc99-c365-4040-93a6-43fef524b461.png" alt="Logo" className="w-32 h-32" />
           </div>
-          <CardTitle className="text-2xl">Hybrid Chicks Login</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-2xl text-white">Hybrid Chicks Login</CardTitle>
+          <CardDescription className="text-gray-400">Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-white">Email</Label>
               <Input
                 id="email"
                 type="email" 
-                placeholder="osnestabwalya@gmail.com"
+                placeholder="XXXXXXXXXXXXX"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-gray-800 text-white border-gray-700"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="text-white">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
-                placeholder="0966613929"
+                placeholder="XXXXXXXXXX"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
+                className="bg-gray-800 text-white border-gray-700"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-white">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="XXXXXXXXXX"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-gray-800 text-white border-gray-700"
               />
             </div>
             
@@ -98,13 +101,15 @@ const LoginPage = () => {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col items-center space-y-2">
-          <img 
-            src="/lovable-uploads/b0435e33-525c-4a83-9da6-fd5a9f6f8e53.png" 
-            alt="Baobub Technologies" 
-            className="h-8 w-auto mb-1"
-          />
-          <div className="flex items-center text-xs text-gray-500">
+        <CardFooter className="flex flex-col items-center space-y-2 border-t border-gray-800">
+          <div className="flex items-center mt-4">
+            <img 
+              src="/lovable-uploads/b0435e33-525c-4a83-9da6-fd5a9f6f8e53.png" 
+              alt="Baobub Technologies" 
+              className="h-8 w-auto mb-1"
+            />
+          </div>
+          <div className="flex items-center text-xs text-gray-400">
             <Copyright className="w-3 h-3 mr-1" />
             <span>2025 Baobub Technologies</span>
           </div>
