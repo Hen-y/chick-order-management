@@ -1,7 +1,7 @@
 
 import DashboardLayout from "../components/DashboardLayout";
 import NewOrderForm from "../components/NewOrderForm";
-import OrderStatistics from "../components/OrderStatistics";
+import OrderStatisticsWithToggle from "../components/OrderStatisticsWithToggle";
 import UpcomingCollections from "../components/UpcomingCollections";
 import UpcomingReminders from "../components/UpcomingReminders";
 
@@ -20,7 +20,7 @@ const Index = () => {
             
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Order Statistics</h2>
-              <OrderStatistics />
+              <OrderStatisticsWithToggle />
             </div>
           </div>
           
