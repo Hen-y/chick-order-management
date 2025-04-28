@@ -1,17 +1,53 @@
 
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const data = [
-  { name: 'Mon', broiler: 24, village: 16 },
-  { name: 'Tue', broiler: 42, village: 28 },
-  { name: 'Wed', broiler: 18, village: 12 },
-  { name: 'Thu', broiler: 32, village: 24 },
-  { name: 'Fri', broiler: 45, village: 36 },
-  { name: 'Sat', broiler: 16, village: 8 },
-  { name: 'Sun', broiler: 8, village: 4 },
+const defaultData = [
+  { name: 'Mon', broiler: 0, village: 0 },
+  { name: 'Tue', broiler: 0, village: 0 },
+  { name: 'Wed', broiler: 0, village: 0 },
+  { name: 'Thu', broiler: 0, village: 0 },
+  { name: 'Fri', broiler: 0, village: 0 },
+  { name: 'Sat', broiler: 0, village: 0 },
+  { name: 'Sun', broiler: 0, village: 0 },
 ];
 
 const WeeklyReportChart = () => {
+  const [data, setData] = useState(defaultData);
+
+  useEffect(() => {
+    // Load data from localStorage or use default
+    const storedData = localStorage.getItem('weeklyChartData');
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          setData(parsedData);
+        } else {
+          // If empty array or invalid, initialize with defaults
+          localStorage.setItem('weeklyChartData', JSON.stringify(defaultData));
+        }
+      } catch (e) {
+        console.error('Error parsing weekly chart data:', e);
+        localStorage.setItem('weeklyChartData', JSON.stringify(defaultData));
+      }
+    } else {
+      // Initialize if not exists
+      localStorage.setItem('weeklyChartData', JSON.stringify(defaultData));
+    }
+
+    // Listen for reset events
+    const handleReset = () => {
+      setData(defaultData);
+    };
+
+    window.addEventListener('reportsReset', handleReset);
+    
+    return () => {
+      window.removeEventListener('reportsReset', handleReset);
+    };
+  }, []);
+
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">

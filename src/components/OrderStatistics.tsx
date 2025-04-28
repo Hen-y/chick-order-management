@@ -1,13 +1,29 @@
 
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
-const data = [
-  { name: 'W4', broiler: 50, village: 25 },
-  { name: 'W3', broiler: 100, village: 0 },
-  { name: 'W2', broiler: 0, village: 75 },
+const defaultData = [
+  { name: 'W4', broiler: 0, village: 0 },
+  { name: 'W3', broiler: 0, village: 0 },
+  { name: 'W2', broiler: 0, village: 0 },
 ];
 
 const OrderStatistics = () => {
+  const [data, setData] = useState(defaultData);
+
+  useEffect(() => {
+    // Listen for reset events
+    const handleReset = () => {
+      setData(defaultData);
+    };
+
+    window.addEventListener('reportsReset', handleReset);
+    
+    return () => {
+      window.removeEventListener('reportsReset', handleReset);
+    };
+  }, []);
+
   return (
     <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">

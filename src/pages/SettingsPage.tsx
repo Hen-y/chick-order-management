@@ -58,6 +58,12 @@ const SettingsPage = () => {
     localStorage.removeItem("villageChicks");
     localStorage.removeItem("totalRevenue");
     
+    // Also clear chart data for each type of chart
+    localStorage.setItem("dailyChartData", JSON.stringify([]));
+    localStorage.setItem("weeklyChartData", JSON.stringify([]));
+    localStorage.setItem("monthlyChartData", JSON.stringify([]));
+    localStorage.setItem("yearlyChartData", JSON.stringify([]));
+    
     // Dispatch event to notify components about data reset
     window.dispatchEvent(new CustomEvent('reportsReset'));
     

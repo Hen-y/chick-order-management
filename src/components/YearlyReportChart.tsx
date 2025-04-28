@@ -1,22 +1,58 @@
 
+import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const data = [
-  { name: 'Jan', broiler: 400, village: 240 },
-  { name: 'Feb', broiler: 380, village: 218 },
-  { name: 'Mar', broiler: 450, village: 280 },
-  { name: 'Apr', broiler: 430, village: 270 },
-  { name: 'May', broiler: 410, village: 250 },
-  { name: 'Jun', broiler: 500, village: 320 },
-  { name: 'Jul', broiler: 480, village: 300 },
-  { name: 'Aug', broiler: 460, village: 290 },
-  { name: 'Sep', broiler: 510, village: 330 },
-  { name: 'Oct', broiler: 520, village: 340 },
-  { name: 'Nov', broiler: 480, village: 310 },
-  { name: 'Dec', broiler: 540, village: 360 },
+const defaultData = [
+  { name: 'Jan', broiler: 0, village: 0 },
+  { name: 'Feb', broiler: 0, village: 0 },
+  { name: 'Mar', broiler: 0, village: 0 },
+  { name: 'Apr', broiler: 0, village: 0 },
+  { name: 'May', broiler: 0, village: 0 },
+  { name: 'Jun', broiler: 0, village: 0 },
+  { name: 'Jul', broiler: 0, village: 0 },
+  { name: 'Aug', broiler: 0, village: 0 },
+  { name: 'Sep', broiler: 0, village: 0 },
+  { name: 'Oct', broiler: 0, village: 0 },
+  { name: 'Nov', broiler: 0, village: 0 },
+  { name: 'Dec', broiler: 0, village: 0 },
 ];
 
 const YearlyReportChart = () => {
+  const [data, setData] = useState(defaultData);
+
+  useEffect(() => {
+    // Load data from localStorage or use default
+    const storedData = localStorage.getItem('yearlyChartData');
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          setData(parsedData);
+        } else {
+          // If empty array or invalid, initialize with defaults
+          localStorage.setItem('yearlyChartData', JSON.stringify(defaultData));
+        }
+      } catch (e) {
+        console.error('Error parsing yearly chart data:', e);
+        localStorage.setItem('yearlyChartData', JSON.stringify(defaultData));
+      }
+    } else {
+      // Initialize if not exists
+      localStorage.setItem('yearlyChartData', JSON.stringify(defaultData));
+    }
+
+    // Listen for reset events
+    const handleReset = () => {
+      setData(defaultData);
+    };
+
+    window.addEventListener('reportsReset', handleReset);
+    
+    return () => {
+      window.removeEventListener('reportsReset', handleReset);
+    };
+  }, []);
+
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
