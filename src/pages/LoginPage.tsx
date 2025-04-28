@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Copyright } from "lucide-react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -97,8 +98,16 @@ const LoginPage = () => {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="text-sm text-center text-gray-500">
-          Hybrid Chicks Management System
+        <CardFooter className="flex flex-col items-center space-y-2">
+          <img 
+            src="/lovable-uploads/b0435e33-525c-4a83-9da6-fd5a9f6f8e53.png" 
+            alt="Baobub Technologies" 
+            className="h-8 w-auto mb-1"
+          />
+          <div className="flex items-center text-xs text-gray-500">
+            <Copyright className="w-3 h-3 mr-1" />
+            <span>2025 Baobub Technologies</span>
+          </div>
         </CardFooter>
       </Card>
     </div>

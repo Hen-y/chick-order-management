@@ -9,6 +9,7 @@ import {
   LogOut
 } from "lucide-react";
 import { toast } from "sonner";
+import { Copyright } from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", icon: Dashboard, path: "/" },
@@ -54,7 +55,17 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 flex flex-col items-center border-t border-gray-700">
+        <img 
+          src="/lovable-uploads/b0435e33-525c-4a83-9da6-fd5a9f6f8e53.png" 
+          alt="Baobub Technologies" 
+          className="mb-2 w-40 h-auto"
+        />
+        <div className="flex items-center text-xs text-gray-400 mb-4">
+          <Copyright className="w-3 h-3 mr-1" />
+          <span>2025 Baobub Technologies</span>
+        </div>
+        
         <button 
           className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white w-full hover:bg-red-700 rounded-lg transition-colors"
           onClick={handleLogout}
