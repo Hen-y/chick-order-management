@@ -24,33 +24,35 @@ const InventorySummary = () => {
   ]);
 
   useEffect(() => {
-    // Load data from localStorage or use default
-    const storedData = localStorage.getItem('inventorySummary');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setData([
-          { name: 'Broiler', value: parsedData.totalBroiler || mockInventoryData.totalBroiler },
-          { name: 'Village', value: parsedData.totalVillage || mockInventoryData.totalVillage }
-        ]);
-      } catch (e) {
-        console.error('Error parsing inventory summary data:', e);
+    const loadDataFromLocalStorage = () => {
+      const storedData = localStorage.getItem('inventorySummary');
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          setData([
+            { name: 'Broiler', value: parsedData.totalBroiler || 0 },
+            { name: 'Village', value: parsedData.totalVillage || 0 }
+          ]);
+        } catch (e) {
+          console.error('Error parsing inventory summary data:', e);
+          // Use default values on error
+          setData(defaultData);
+        }
+      } else {
+        // Initialize if not exists
+        localStorage.setItem('inventorySummary', JSON.stringify({
+          totalBroiler: mockInventoryData.totalBroiler,
+          totalVillage: mockInventoryData.totalVillage
+        }));
       }
-    } else {
-      // Initialize if not exists
-      localStorage.setItem('inventorySummary', JSON.stringify({
-        totalBroiler: mockInventoryData.totalBroiler,
-        totalVillage: mockInventoryData.totalVillage
-      }));
-    }
+    };
+
+    // Load initial data
+    loadDataFromLocalStorage();
 
     // Listen for reset events
     const handleReset = () => {
       setData(defaultData);
-      localStorage.setItem('inventorySummary', JSON.stringify({
-        totalBroiler: 0,
-        totalVillage: 0
-      }));
     };
 
     window.addEventListener('reportsReset', handleReset);

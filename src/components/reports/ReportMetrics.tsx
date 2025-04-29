@@ -24,23 +24,29 @@ const ReportMetrics = () => {
 
   // Load data from localStorage on component mount
   useEffect(() => {
-    const totalOrders = localStorage.getItem("totalOrders");
-    const broilerChicks = localStorage.getItem("broilerChicks");
-    const villageChicks = localStorage.getItem("villageChicks");
-    const totalRevenue = localStorage.getItem("totalRevenue");
+    const loadDataFromLocalStorage = () => {
+      const totalOrders = localStorage.getItem("totalOrders");
+      const broilerChicks = localStorage.getItem("broilerChicks");
+      const villageChicks = localStorage.getItem("villageChicks");
+      const totalRevenue = localStorage.getItem("totalRevenue");
 
-    if (totalOrders) {
-      setReportData(prev => ({...prev, totalOrders}));
-    }
-    if (broilerChicks) {
-      setReportData(prev => ({...prev, broilerChicks}));
-    }
-    if (villageChicks) {
-      setReportData(prev => ({...prev, villageChicks}));
-    }
-    if (totalRevenue) {
-      setReportData(prev => ({...prev, totalRevenue}));
-    }
+      // Only update state if values exist in localStorage
+      if (totalOrders) {
+        setReportData(prev => ({...prev, totalOrders}));
+      }
+      if (broilerChicks) {
+        setReportData(prev => ({...prev, broilerChicks}));
+      }
+      if (villageChicks) {
+        setReportData(prev => ({...prev, villageChicks}));
+      }
+      if (totalRevenue) {
+        setReportData(prev => ({...prev, totalRevenue}));
+      }
+    };
+
+    // Load initial data
+    loadDataFromLocalStorage();
 
     // Listen for reset events
     const handleReset = () => {

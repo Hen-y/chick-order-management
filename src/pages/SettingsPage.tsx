@@ -52,19 +52,20 @@ const SettingsPage = () => {
     localStorage.removeItem("monthlyReportData");
     localStorage.removeItem("yearlyReportData");
     
-    // Reset metrics
-    localStorage.removeItem("totalOrders");
-    localStorage.removeItem("broilerChicks");
-    localStorage.removeItem("villageChicks");
-    localStorage.removeItem("totalRevenue");
+    // Reset metrics - Important: Set explicit "0" values instead of just removing the items
+    localStorage.setItem("totalOrders", "0");
+    localStorage.setItem("broilerChicks", "0");
+    localStorage.setItem("villageChicks", "0");
+    localStorage.setItem("totalRevenue", "0 K");
     
     // Clear chart data for each type of chart
     localStorage.setItem("dailyChartData", JSON.stringify([]));
     localStorage.setItem("weeklyChartData", JSON.stringify([]));
     localStorage.setItem("monthlyChartData", JSON.stringify([]));
     localStorage.setItem("yearlyChartData", JSON.stringify([]));
+    localStorage.setItem("orderStatisticsData", JSON.stringify([]));
     
-    // Reset inventory data
+    // Reset inventory data - Important: Set explicit empty values
     localStorage.setItem("inventorySummary", JSON.stringify({ totalBroiler: 0, totalVillage: 0 }));
     localStorage.setItem("weeklyDistribution", JSON.stringify({ weeklyBroiler: 0, weeklyVillage: 0 }));
     localStorage.setItem("monthlyInventoryRecords", JSON.stringify([]));

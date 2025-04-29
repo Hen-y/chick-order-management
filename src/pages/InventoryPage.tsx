@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import { 
@@ -29,44 +28,54 @@ const InventoryPage = () => {
   const [monthlyRecords, setMonthlyRecords] = useState(mockInventoryData.monthlyRecords);
 
   useEffect(() => {
-    // Load data from localStorage or use default
-    const storedWeeklyData = localStorage.getItem('weeklyDistribution');
-    if (storedWeeklyData) {
-      try {
-        const parsedData = JSON.parse(storedWeeklyData);
-        setWeeklyDistribution({
-          weeklyBroiler: parsedData.weeklyBroiler ?? mockInventoryData.weeklyBroiler,
-          weeklyVillage: parsedData.weeklyVillage ?? mockInventoryData.weeklyVillage
-        });
-      } catch (e) {
-        console.error('Error parsing weekly distribution data:', e);
-      }
-    } else {
-      // Initialize if not exists
-      localStorage.setItem('weeklyDistribution', JSON.stringify({
-        weeklyBroiler: mockInventoryData.weeklyBroiler,
-        weeklyVillage: mockInventoryData.weeklyVillage
-      }));
-    }
-    
-    const storedMonthlyData = localStorage.getItem('monthlyInventoryRecords');
-    if (storedMonthlyData) {
-      try {
-        const parsedData = JSON.parse(storedMonthlyData);
-        if (Array.isArray(parsedData) && parsedData.length > 0) {
-          setMonthlyRecords(parsedData);
-        } else {
-          // If empty array or invalid, initialize with defaults
-          localStorage.setItem('monthlyInventoryRecords', JSON.stringify(mockInventoryData.monthlyRecords));
+    const loadDataFromLocalStorage = () => {
+      // Load weekly distribution data
+      const storedWeeklyData = localStorage.getItem('weeklyDistribution');
+      if (storedWeeklyData) {
+        try {
+          const parsedData = JSON.parse(storedWeeklyData);
+          setWeeklyDistribution({
+            weeklyBroiler: parsedData.weeklyBroiler ?? mockInventoryData.weeklyBroiler,
+            weeklyVillage: parsedData.weeklyVillage ?? mockInventoryData.weeklyVillage
+          });
+        } catch (e) {
+          console.error('Error parsing weekly distribution data:', e);
+          setWeeklyDistribution({
+            weeklyBroiler: 0,
+            weeklyVillage: 0
+          });
         }
-      } catch (e) {
-        console.error('Error parsing monthly records data:', e);
+      } else {
+        // Initialize if not exists
+        localStorage.setItem('weeklyDistribution', JSON.stringify({
+          weeklyBroiler: mockInventoryData.weeklyBroiler,
+          weeklyVillage: mockInventoryData.weeklyVillage
+        }));
+      }
+      
+      // Load monthly records data
+      const storedMonthlyData = localStorage.getItem('monthlyInventoryRecords');
+      if (storedMonthlyData) {
+        try {
+          const parsedData = JSON.parse(storedMonthlyData);
+          if (Array.isArray(parsedData)) {
+            setMonthlyRecords(parsedData);
+          } else {
+            // If invalid data format, use empty array
+            setMonthlyRecords(defaultMonthlyRecords);
+          }
+        } catch (e) {
+          console.error('Error parsing monthly records data:', e);
+          setMonthlyRecords(defaultMonthlyRecords);
+        }
+      } else {
+        // Initialize if not exists
         localStorage.setItem('monthlyInventoryRecords', JSON.stringify(mockInventoryData.monthlyRecords));
       }
-    } else {
-      // Initialize if not exists
-      localStorage.setItem('monthlyInventoryRecords', JSON.stringify(mockInventoryData.monthlyRecords));
-    }
+    };
+
+    // Load initial data
+    loadDataFromLocalStorage();
 
     // Listen for reset events
     const handleReset = () => {
@@ -76,13 +85,6 @@ const InventoryPage = () => {
       });
       
       setMonthlyRecords(defaultMonthlyRecords);
-      
-      localStorage.setItem('weeklyDistribution', JSON.stringify({
-        weeklyBroiler: 0,
-        weeklyVillage: 0
-      }));
-      
-      localStorage.setItem('monthlyInventoryRecords', JSON.stringify(defaultMonthlyRecords));
     };
 
     window.addEventListener('reportsReset', handleReset);
