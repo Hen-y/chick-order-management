@@ -58,16 +58,22 @@ const SettingsPage = () => {
     localStorage.removeItem("villageChicks");
     localStorage.removeItem("totalRevenue");
     
-    // Also clear chart data for each type of chart
+    // Clear chart data for each type of chart
     localStorage.setItem("dailyChartData", JSON.stringify([]));
     localStorage.setItem("weeklyChartData", JSON.stringify([]));
     localStorage.setItem("monthlyChartData", JSON.stringify([]));
     localStorage.setItem("yearlyChartData", JSON.stringify([]));
     
+    // Reset inventory data
+    localStorage.setItem("inventorySummary", JSON.stringify({ totalBroiler: 0, totalVillage: 0 }));
+    localStorage.setItem("weeklyDistribution", JSON.stringify({ weeklyBroiler: 0, weeklyVillage: 0 }));
+    localStorage.setItem("monthlyInventoryRecords", JSON.stringify([]));
+    
     // Dispatch event to notify components about data reset
     window.dispatchEvent(new CustomEvent('reportsReset'));
+    window.dispatchEvent(new CustomEvent('inventoryReset'));
     
-    toast.success("All report data has been reset to zero");
+    toast.success("All data has been reset to zero");
   };
 
   return (
